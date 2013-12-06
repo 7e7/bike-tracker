@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.0/backbone-min.js"></script>
+</head>
+<body>
+<script>
+var Bike = Backbone.Model.extend({})
+var Bikes = Backbone.Collection.extend({ model:Bike })
+
+var Router = Backbone.Router.extend({
+    routes:{
+        'bikes/:id':'getBike'
+    }
+})
+var BikeListView = Backbone.View.extend({
+    initialize: function(){
+        this.render();
+    },
+    template: _.template(["<h1>Bikes</h1><ul class='bike_list'>",
+          "<% items.each(function(item) { %>",
+            "<%= itemTemplate(item) %>",
+          "<% }); %>",
+        "</ul>"
+        ].join('')),
+    itemTemplate:_.template("<li><a href='#'><%= attributes.name %></a></li>"),
+    render: function() {
+        $(this.el).empty().append(this.template({
+          items: App.bikes,
+          itemTemplate: this.itemTemplate
+        }));
+    },
+    el: $('body')
+})
+var BikeView = Backbone.View.extend({
+    render:function(){},
+    template: _.template(['<h1><%= attributes.name %></h1><dl>',
+        '<dt>Make</dt><dd><%= attributes.make %></dd>',
+        '<dt>Model</dt><dd><%= attributes.model %></dd>',
+        '<dt>Year</dt><dd><%= attributes.year %></dd>',
+    '</dl>'].join(''))
+}) 
+
+App={
+    bikes: new Bikes([
+        {"name":"The Dale", "make":"Cannondale", "model": "CAAD10 Ultegra", "year":2014},
+        {"name":"Rocket Ship", "make":"Trek", "model": "1.5", "year":2011},
+        {"name":"Batmobile", "make":"Trek", "model": "7.2", "year":2012}
+    ]),
+    init:function(){
+        var blv = new BikeListView({});
+        var router = new Router;
+        router.on('route:getBike',function(id){
+            console.log('this route is looking for the bike with id '+id)
+        })
+    }
+};
+
+App.init();
+
+</script>
+
+
+
+</body>
+</html>
