@@ -59,7 +59,7 @@ var Bike = Backbone.Model.extend({}),
             "click a":"showBike",
             "click button.add": 'newBikeLine',
             "click button.cancel":'removeBikeLine',
-            "submit .bike_list form": 'submitHandler'
+            "submit .bike_list form": 'addNewBike'
         },
         showBike:function(ev){
             ev.preventDefault();
@@ -70,19 +70,16 @@ var Bike = Backbone.Model.extend({}),
         },
         removeBikeLine: function(event){
             event.preventDefault();
-            jQuery(event.target).parents('li').remove()
+            $(event.target).parents('li').remove()
         },
-        submitHandler:function(){
-            event.preventDefault();
-            App.bikes.add({
+        addNewBike:function(){
+            $(event.target).parents('li').after(this.itemTemplate(App.bikes.add({
                 name:event.target.name.value,
                 make:event.target.make.value,
                 model:event.target.model.value,
                 year:event.target.year.value,
                 location:""
-            })
-            blv.render()
-            console.log()
+            }))).remove()
         },
     }),
     BikeView = Backbone.View.extend({
@@ -115,14 +112,26 @@ var Bike = Backbone.Model.extend({}),
             "</ul><button>Add a location</button>"
             ].join('')),
         itemTemplate:_.template("<li><a href='#<%= cid %>'><%= attributes.name %></a></li>"),
+        events:{
+            "click a":"showStorageLocation"
+        },
+        showStorageLocation:function(event){
+            event.preventDefault();
+            slv.render(event.target.hash.substring(1));
+        }
     }),
     StorageLocationView = Backbone.View.extend({
         initialize:function(){},
         render:function(id){
-            
+            $(this.el).empty().append(this.template({location: App.store.get(id), itemTemplate:this.itemTemplate}))
         },
         el:$('.location'),
-        template: _.template('')
+        template: _.template(['<h1><%= location.attributes.name %></h1>',
+            "<ul>",
+                "",// TODO: add in display for bikes in a location?  maybe change StorageLocation.bikes to be a collection?"
+                "<li></li>",
+        "</ul>"].join('')),
+        itemTemplate:"<li><%= item %></li>"
     }),
     AddLocationView=Backbone.View.extend({});
 App={
@@ -133,8 +142,8 @@ App={
         {"name":"Cross", "make":"Focus", "model": "Mares AX 3.0", "year":2013, "location": ""}
     ]),
     store: new Store([
-        {name: "Floor1", bikes:[] },
-        {name: "Basement", bikes:[] }
+        {name: "Floor1", bikes:['test1'] },
+        {name: "Basement", bikes:['2','3'] }
     ]),
     init:function(){
         blv = new BikeListView(), 
