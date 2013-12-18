@@ -4,13 +4,51 @@
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.0/backbone-min.js"></script>
+<script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
+<link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" />
+<style>
+.stage{padding:40px 15px;}
+</style>
 </head>
 <body>
-    <div class="bikes"></div>
-    <div class="bike"></div>
-    <hr />
-    <div class="store"></div>
-    <div class="location"></div>
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#home">Bike Tracker</a>
+            </div>
+            <div class="collapse navbar-collapse">
+              <ul class="nav navbar-nav">
+                <li class="active"><a href="#home">Home</a></li>
+                <li><a href="#bikes">Bikes</a></li>
+                <li><a href="#locations">Locations</a></li>
+              </ul>
+            </div>
+        </div>
+    </div>
+    <div class="container stage">
+        <div class="view-group jumbotron" id="home">
+            <div class="welcome">
+                <h1>Hello</h1>
+                <p>So this is just a sandbox backbone project.</p>
+                <p>In theory, you can track where your bikes are with this.  Thats still a bit off into the future.</p>
+                <p>This project's github is <a target="_blank" href="https://github.com/7e7/bike-tracker">here</a>.</p>
+            </div>
+        </div>
+        <div class="view-group row" id="bikes">
+            <div class="bikes col-md-3"></div>
+            <div class="bike col-md-9"></div>
+        </div>
+        <div class="view-group" id="locations">
+            <div class="store bikes col-md-3"></div>
+            <div class="location bikes col-md-9"></div>
+        </div>        
+    </div>
 <script>
 var Bike = Backbone.Model.extend({}),
     Bikes = Backbone.Collection.extend({ model:Bike }),
@@ -133,7 +171,12 @@ var Bike = Backbone.Model.extend({}),
         "</ul>"].join('')),
         itemTemplate:"<li><%= item %></li>"
     }),
-    AddLocationView=Backbone.View.extend({});
+    NavView = Backbone.View.extend({
+        initialize:function(){},
+        render:function(){},
+        template:_.template(''),
+        el:$()
+    });
 App={
     bikes: new Bikes([
         {"name":"The Dale", "make":"Cannondale", "model": "CAAD10 Ultegra", "year":2014, "location": ""},
@@ -150,6 +193,13 @@ App={
         bv = new BikeView();
         sv = new StoreView();
         slv = new StorageLocationView();
+        $('.view-group').hide().filter('#home').show();
+        $('.navbar a').on('click', function(event){ 
+            event.preventDefault();
+            $('.view-group').hide().filter(event.target.hash).show();
+            $('.navbar li').removeClass('active').filter($(this).parents('li')).addClass('active');
+            if($(this).hasClass('navbar-brand')){ $('a[href=#home]').parents('li').addClass('active') }
+        })
     }
 };
 
