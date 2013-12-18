@@ -14,8 +14,8 @@
 <!-- 
 some high level to dos
 
+add edit/remove functions to the bikeview and storeview
 add in bike location tracking into the storage locations model/view and BikeView view
-add in data persistence via storage api
 replace the App.init event handlers with a NavView view
 
  -->
@@ -206,7 +206,7 @@ App={
     init:function(){
         if(!App.load()){
             App.scaffold();
-        }
+        };
         blv = new BikeListView(), 
         bv = new BikeView(),
         sv = new StoreView(),
@@ -222,19 +222,21 @@ App={
         })
     },
     save:function(){
-        window.sessionStorage.setItem('bikes', JSON.stringify(App.bikes.toJSON()));
-        window.sessionStorage.setItem('store', JSON.stringify(App.store.toJSON()))
+        window.localStorage.setItem('bikes', JSON.stringify(App.bikes.toJSON()));
+        window.localStorage.setItem('store', JSON.stringify(App.store.toJSON()))
     },
     load:function(){
-        if(typeof JSON.parse(window.sessionStorage.bikes) == 'object' && typeof JSON.parse(window.sessionStorage.store) == 'object' ){
-            App.bikes = new Bikes(JSON.parse(window.sessionStorage.bikes));
-            App.store = new Store(JSON.parse(window.sessionStorage.store));
+        var bikes = window.localStorage.bikes,
+            store = window.localStorage.store;
+            
+        if( bikes && store && typeof JSON.parse(bikes) == 'object' && typeof JSON.parse(store) == 'object' ){
+            App.bikes = new Bikes(JSON.parse(bikes));
+            App.store = new Store(JSON.parse(store));
             return true;
         }
         else{
             return false;
         }
-        
     },
     scaffold: function(){
         App.bikes=new Bikes([{"name":"Batmobile", "make":"Trek", "model": "7.2", "year":2012, "location": ""}]);
