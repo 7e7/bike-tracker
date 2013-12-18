@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+<title>Bike Tracker</title>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.0/backbone-min.js"></script>
@@ -10,6 +11,15 @@
 .stage{padding:40px 15px;}
 </style>
 </head>
+<!-- 
+some high level to dos
+
+add in new locations to the store view
+add in bike location tracking into the storage locations model/view and BikeView view
+add in data persistence via storage api
+replace the App.init event handlers with a NavView view
+
+ -->
 <body>
     <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
         <div class="container">
@@ -82,8 +92,8 @@ var Bike = Backbone.Model.extend({}),
             "<input type='text' class='name' name='name' placeholder='name'/>",
             "<input type='text' class='make' name='make' placeholder='make'/>",
             "<input type='text' class='model' name='model' placeholder='model'/>",
-            "<input type='number' class='year' name='year' placeholder='2014' min='1950'/>",
-            "<input type='submit' value='submit' />",
+            "<input type='number' class='year' name='year' placeholder='2014' min='1950'/><br/>",
+            "<input type='submit' value='add' />",
             "<button class='cancel'>cancel</button>",
         "</form></li>"].join('')),
         render: function() {
@@ -94,10 +104,10 @@ var Bike = Backbone.Model.extend({}),
         },
         el: $('.bikes'),
         events:{
-            "click a":"showBike",
+            "click .bike_list a":"showBike",
             "click button.add": 'newBikeLine',
             "click button.cancel":'removeBikeLine',
-            "submit .bike_list form": 'addNewBike'
+            "submit form": 'addNewBike'
         },
         showBike:function(ev){
             ev.preventDefault();
@@ -111,6 +121,7 @@ var Bike = Backbone.Model.extend({}),
             $(event.target).parents('li').remove()
         },
         addNewBike:function(){
+            event.preventDefault();
             $(event.target).parents('li').after(this.itemTemplate(App.bikes.add({
                 name:event.target.name.value,
                 make:event.target.make.value,
@@ -121,15 +132,15 @@ var Bike = Backbone.Model.extend({}),
         },
     }),
     BikeView = Backbone.View.extend({
-    initialize:function(){},
-    render:function(id){ $(this.el).empty().append( this.template({ bike: App.bikes.get(id) })) },
-    template: _.template(['<h1><%= bike.attributes.name %></h1><dl>',
-        '<dt>Make</dt><dd><%= bike.attributes.make %></dd>',
-        '<dt>Model</dt><dd><%= bike.attributes.model %></dd>',
-        '<dt>Year</dt><dd><%= bike.attributes.year %></dd>',
-        '<dt>Location</dt><dd><% if(bike.attributes.location){ %><%= bike.attributes.location %> <button>Move bike</button> <% } else { %>None  <button>Set Location</button><% } %> </dd>',
-    '</dl>'].join('')),
-    el:$('.bike'),
+        initialize:function(){},
+        render:function(id){ $(this.el).empty().append( this.template({ bike: App.bikes.get(id) })) },
+        template: _.template(['<h1><%= bike.attributes.name %></h1><dl>',
+            '<dt>Make</dt><dd><%= bike.attributes.make %></dd>',
+            '<dt>Model</dt><dd><%= bike.attributes.model %></dd>',
+            '<dt>Year</dt><dd><%= bike.attributes.year %></dd>',
+            '<dt>Location</dt><dd><% if(bike.attributes.location){ %><%= bike.attributes.location %> <button>Move bike</button> <% } else { %>None  <button>Set Location</button><% } %> </dd>',
+        '</dl>'].join('')),
+        el:$('.bike')
     
     })
     StoreView = Backbone.View.extend({
@@ -150,11 +161,13 @@ var Bike = Backbone.Model.extend({}),
             "</ul><button>Add a location</button>"
             ].join('')),
         itemTemplate:_.template("<li><a href='#<%= cid %>'><%= attributes.name %></a></li>"),
+        newItemTemplate:_.template('<li><form><input type="text" name="name" placeholder="name"/><input type="submit" value="add"><button class="cancel">cancel</button></form></li>'),
         events:{
             "click a":"showStorageLocation"
         },
         showStorageLocation:function(event){
             event.preventDefault();
+            console.log(event)
             slv.render(event.target.hash.substring(1));
         }
     }),
@@ -166,7 +179,7 @@ var Bike = Backbone.Model.extend({}),
         el:$('.location'),
         template: _.template(['<h1><%= location.attributes.name %></h1>',
             "<ul>",
-                "",// TODO: add in display for bikes in a location?  maybe change StorageLocation.bikes to be a collection?"
+                "",
                 "<li></li>",
         "</ul>"].join('')),
         itemTemplate:"<li><%= item %></li>"
@@ -190,20 +203,25 @@ App={
     ]),
     init:function(){
         blv = new BikeListView(), 
-        bv = new BikeView();
-        sv = new StoreView();
+        bv = new BikeView(),
+        sv = new StoreView(),
         slv = new StorageLocationView();
+        
         $('.view-group').hide().filter('#home').show();
         $('.navbar a').on('click', function(event){ 
             event.preventDefault();
             $('.view-group').hide().filter(event.target.hash).show();
             $('.navbar li').removeClass('active').filter($(this).parents('li')).addClass('active');
             if($(this).hasClass('navbar-brand')){ $('a[href=#home]').parents('li').addClass('active') }
+            //add in view rerenders, for funsies?
         })
     }
 };
 
 App.init();
+App.scaffold=function(){
+    
+}
 
 </script>
 
