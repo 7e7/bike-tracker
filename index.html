@@ -9,6 +9,7 @@
 <link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" />
 <style>
 .stage{padding:40px 15px;}
+.bike_list .active, .location_list .active { font-weight:700; }
 </style>
 </head>
 <!-- 
@@ -59,7 +60,11 @@ replace the App.init event handlers with a NavView view
         </div>        
     </div>
 <script>
-var Bike = Backbone.Model.extend({}),
+var Bike = Backbone.Model.extend({
+        initialize:function(options){
+            this.location = '';
+        }
+    }),
     Bikes = Backbone.Collection.extend({ model:Bike }),
     StorageLocation = Backbone.Model.extend({
         addBike:function(id){
@@ -108,9 +113,10 @@ var Bike = Backbone.Model.extend({}),
             "click button.cancel":'removeBikeLine',
             "submit .bike_list form": 'addNewBike'
         },
-        showBike:function(ev){
-            ev.preventDefault();
-            bv.render(ev.target.hash.substring(1));
+        showBike:function(event){
+            event.preventDefault();
+            $('.bike_list li').removeClass('active').filter($(event.target).parents('li')).addClass('active');
+            bv.render(event.target.hash.substring(1));
         },
         newBikeLine: function(){
             $(this.el).find('.bike_list').append(this.newItemTemplate())
@@ -125,8 +131,7 @@ var Bike = Backbone.Model.extend({}),
                 name:event.target.name.value,
                 make:event.target.make.value,
                 model:event.target.model.value,
-                year:event.target.year.value,
-                location:""
+                year:event.target.year.value
             }))).remove()
             App.save()
         },
@@ -134,14 +139,39 @@ var Bike = Backbone.Model.extend({}),
     BikeView = Backbone.View.extend({
         initialize:function(){},
         render:function(id){ $(this.el).empty().append( this.template({ bike: App.bikes.get(id) })) },
-        template: _.template(['<h1><%= bike.attributes.name %></h1><dl>',
-            '<dt>Make</dt><dd><%= bike.attributes.make %></dd>',
-            '<dt>Model</dt><dd><%= bike.attributes.model %></dd>',
-            '<dt>Year</dt><dd><%= bike.attributes.year %></dd>',
-            '<dt>Location</dt><dd><% if(bike.attributes.location){ %><%= bike.attributes.location %> <button>Move bike</button> <% } else { %>None  <button>Set Location</button><% } %> </dd>',
+        template: _.template(['<h1><%= bike.get("name") %></h1>',
+        '<p><button class="edit" data-id="<%= bike.cid %>">Edit</button> <button class="delete" data-id="<%= bike.cid %>">Delete</button></p>',
+        '<dl>',
+            '<dt>Make</dt><dd><%= bike.get("make") %></dd>',
+            '<dt>Model</dt><dd><%= bike.get("model") %></dd>',
+            '<dt>Year</dt><dd><%= bike.get("year") %></dd>',
+            '<dt>Location</dt><dd><% if(bike.get("location").length){ %><%= bike.get("location") %><% }else{ %>None<% } %></dd>',
         '</dl>'].join('')),
-        el:$('.bike')
-    
+        editTemplate: _.template(['<h1><%= bike.get("name") %></h1>',
+        '<form><dl>',
+            '<dt>Make</dt><dd><input type="text" value="<%= bike.get("make") %>" /></dd>',
+            '<dt>Model</dt><dd><input type="text" value="<%= bike.get("model") %>" /></dd>',
+            '<dt>Year</dt><dd><input type="text" value="<%= bike.get("year") %>" /></dd>',
+            '<dt>Location</dt><dd><input type="text" value="<%= bike.get("location") %>" /></dd>',
+        '</dl><input type="submit" /><button class="cancel" data-id="<%= bike.cid %>">cancel</button></form>'].join('')),
+        el:$('.bike'),
+        events:{
+            "click .edit":"showEditMode",
+            "click .cancel":"renderNormal",
+            "click .delete":"removeBike"
+        },
+        showEditMode:function(event){
+            $(this.el).empty().append( this.editTemplate({ bike: App.bikes.get( $(event.target).attr('data-id') ) }))
+        },
+        renderNormal:function(event){
+            $(this.el).empty().append( this.template({ bike: App.bikes.get( $(event.target).attr('data-id') ) }))
+        },
+        removeBike:function(event){
+            App.bikes.remove($(event.target).attr('data-id'));
+            App.save();
+            blv.render();
+            $(this.el).empty();
+        }
     })
     StoreView = Backbone.View.extend({
         initialize:function(){
@@ -169,6 +199,7 @@ var Bike = Backbone.Model.extend({}),
         },
         showStorageLocation:function(event){
             event.preventDefault();
+             $('.location_list li').removeClass('active').filter($(event.target).parents('li')).addClass('active')
             slv.render(event.target.hash.substring(1));
         },
         addNewStorageLocationLine:function(event){
@@ -186,18 +217,16 @@ var Bike = Backbone.Model.extend({}),
     StorageLocationView = Backbone.View.extend({
         initialize:function(){},
         render:function(id){
-            $(this.el).empty().append(this.template({location: App.store.get(id), itemTemplate:this.itemTemplate}))
+            $(this.el).empty().append(this.template({location: App.store.get(id)}))
         },
         el:$('.location'),
-        template: _.template(['<h1><%= location.attributes.name %></h1>',
+        template: _.template(['<h1><%= location.get("name") %></h1>',
             "<ul>",
-                "",
-                "<li></li>",
+                "<% for(var i=0, bikes=location.get('bikes');i<bikes.length;i++){ %> <li><%= bikes[i] %></li> <% } %>",
         "</ul>"].join('')),
-        itemTemplate:"<li><%= item %></li>"
     }),
     NavView = Backbone.View.extend({
-        initialize:function(){},
+        initialize:function(){ this.render(); },
         render:function(){},
         template:_.template(''),
         el:$()
@@ -206,7 +235,7 @@ App={
     init:function(){
         if(!App.load()){
             App.scaffold();
-        };
+        }
         blv = new BikeListView(), 
         bv = new BikeView(),
         sv = new StoreView(),
@@ -239,15 +268,13 @@ App={
         }
     },
     scaffold: function(){
-        App.bikes=new Bikes([{"name":"Batmobile", "make":"Trek", "model": "7.2", "year":2012, "location": ""}]);
+        App.bikes=new Bikes([{"name":"my bike", "make":"Trek", "model": "7.5", "year":2014}]);
         App.store=new Store([{"name":"test location", "bikes":[]}])
     }
 };
 
 App.init();
 </script>
-
-
 
 </body>
 </html>
