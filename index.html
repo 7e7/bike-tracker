@@ -14,7 +14,6 @@
 <!-- 
 some high level to dos
 
-add in new locations to the store view
 add in bike location tracking into the storage locations model/view and BikeView view
 add in data persistence via storage api
 replace the App.init event handlers with a NavView view
@@ -107,7 +106,7 @@ var Bike = Backbone.Model.extend({}),
             "click .bike_list a":"showBike",
             "click button.add": 'newBikeLine',
             "click button.cancel":'removeBikeLine',
-            "submit form": 'addNewBike'
+            "submit .bike_list form": 'addNewBike'
         },
         showBike:function(ev){
             ev.preventDefault();
@@ -120,7 +119,7 @@ var Bike = Backbone.Model.extend({}),
             event.preventDefault();
             $(event.target).parents('li').remove()
         },
-        addNewBike:function(){
+        addNewBike:function(event){
             event.preventDefault();
             $(event.target).parents('li').after(this.itemTemplate(App.bikes.add({
                 name:event.target.name.value,
@@ -129,6 +128,7 @@ var Bike = Backbone.Model.extend({}),
                 year:event.target.year.value,
                 location:""
             }))).remove()
+            App.save()
         },
     }),
     BikeView = Backbone.View.extend({
@@ -158,17 +158,29 @@ var Bike = Backbone.Model.extend({}),
                 "<% items.each(function(item) { %>",
                     "<%= itemTemplate(item) %>",
                 "<% }); %>",
-            "</ul><button>Add a location</button>"
+            "</ul><button class='add'>Add a location</button>"
             ].join('')),
         itemTemplate:_.template("<li><a href='#<%= cid %>'><%= attributes.name %></a></li>"),
-        newItemTemplate:_.template('<li><form><input type="text" name="name" placeholder="name"/><input type="submit" value="add"><button class="cancel">cancel</button></form></li>'),
+        newItemTemplate:_.template('<li><form><input type="text" name="name" placeholder="name" required/><br/><input type="submit" value="add"><button class="cancel">cancel</button></form></li>'),
         events:{
-            "click a":"showStorageLocation"
+            "click a":"showStorageLocation",
+            "click button.add":"addNewStorageLocationLine",
+            "submit form":"addNewLocation"
         },
         showStorageLocation:function(event){
             event.preventDefault();
-            console.log(event)
             slv.render(event.target.hash.substring(1));
+        },
+        addNewStorageLocationLine:function(event){
+            $(this.el).find('.location_list').append(this.newItemTemplate())
+        },
+        addNewLocation:function(event){
+            event.preventDefault();
+            $(event.target).parents('li').after(this.itemTemplate(App.store.add({
+                name:event.target.name.value,
+                bikes:[]
+            }))).remove();
+            App.save();
         }
     }),
     StorageLocationView = Backbone.View.extend({
@@ -191,17 +203,10 @@ var Bike = Backbone.Model.extend({}),
         el:$()
     });
 App={
-    bikes: new Bikes([
-        {"name":"The Dale", "make":"Cannondale", "model": "CAAD10 Ultegra", "year":2014, "location": ""},
-        {"name":"Rocket Ship", "make":"Trek", "model": "1.5", "year":2011, "location": ""},
-        {"name":"Batmobile", "make":"Trek", "model": "7.2", "year":2012, "location": ""},
-        {"name":"Cross", "make":"Focus", "model": "Mares AX 3.0", "year":2013, "location": ""}
-    ]),
-    store: new Store([
-        {name: "Floor1", bikes:['test1'] },
-        {name: "Basement", bikes:['2','3'] }
-    ]),
     init:function(){
+        if(!App.load()){
+            App.scaffold();
+        }
         blv = new BikeListView(), 
         bv = new BikeView(),
         sv = new StoreView(),
@@ -215,14 +220,29 @@ App={
             if($(this).hasClass('navbar-brand')){ $('a[href=#home]').parents('li').addClass('active') }
             //add in view rerenders, for funsies?
         })
+    },
+    save:function(){
+        window.sessionStorage.setItem('bikes', JSON.stringify(App.bikes.toJSON()));
+        window.sessionStorage.setItem('store', JSON.stringify(App.store.toJSON()))
+    },
+    load:function(){
+        if(typeof JSON.parse(window.sessionStorage.bikes) == 'object' && typeof JSON.parse(window.sessionStorage.store) == 'object' ){
+            App.bikes = new Bikes(JSON.parse(window.sessionStorage.bikes));
+            App.store = new Store(JSON.parse(window.sessionStorage.store));
+            return true;
+        }
+        else{
+            return false;
+        }
+        
+    },
+    scaffold: function(){
+        App.bikes=new Bikes([{"name":"Batmobile", "make":"Trek", "model": "7.2", "year":2012, "location": ""}]);
+        App.store=new Store([{"name":"test location", "bikes":[]}])
     }
 };
 
 App.init();
-App.scaffold=function(){
-    
-}
-
 </script>
 
 
