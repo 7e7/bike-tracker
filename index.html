@@ -63,6 +63,7 @@ replace the App.init event handlers with a NavView view
 var Bike = Backbone.Model.extend({
 	initialize: function(attributes, options) {
 			this.attributes.location = this.attributes.location || "";
+			this.attributes.serial = this.attributes.serial || "";
 		}
     }),
     Bikes = Backbone.Collection.extend({ model:Bike }),
@@ -145,6 +146,7 @@ var Bike = Backbone.Model.extend({
             '<dt>Make</dt><dd><%= bike.get("make") %></dd>',
             '<dt>Model</dt><dd><%= bike.get("model") %></dd>',
             '<dt>Year</dt><dd><%= bike.get("year") %></dd>',
+			'<dt>Serial No.</dt><dd><%= bike.get("serial") %></dd>',
             '<dt>Location</dt><dd><% if(bike.get("location").length){ %><%= bike.get("location") %><% }else{ %>None<% } %></dd>',
         '</dl>'].join('')),
         editTemplate: _.template(['<form>',
@@ -153,6 +155,7 @@ var Bike = Backbone.Model.extend({
             '<dt>Make</dt><dd><input type="text" name="make" value="<%= bike.get("make") %>" /></dd>',
             '<dt>Model</dt><dd><input type="text" name="model" value="<%= bike.get("model") %>" /></dd>',
             '<dt>Year</dt><dd><input type="text" name="year" value="<%= bike.get("year") %>" /></dd>',
+			'<dt>Serial No.</dt><dd><input type="text" name="serial" value="<%= bike.get("serial") %>" /></dd>',
             '<dt>Location</dt><dd><input type="text" name="location" value="<%= bike.get("location") %>" /></dd>',
         '</dl><input type="submit" /><button class="cancel" data-id="<%= bike.cid %>">cancel</button></form>'].join('')),
         el:$('.bike'),
