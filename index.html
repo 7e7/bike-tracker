@@ -8,6 +8,7 @@
 <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
 <link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" />
 <style>
+/* theres probably a way to do both of these in bootstrap; should look for that. */
 .stage{padding:40px 15px;}
 .bike_list .active, .location_list .active { font-weight:700; }
 </style>
@@ -95,7 +96,7 @@ var Bike = Backbone.Model.extend({
             "<input type='text' class='name' name='name' placeholder='name'/>",
             "<input type='text' class='make' name='make' placeholder='make'/>",
             "<input type='text' class='model' name='model' placeholder='model'/>",
-            "<input type='number' class='year' name='year' placeholder='2014' min='1950'/><br/>",
+            "<input type='number' class='year' name='year' placeholder='2014' value='2014' step='1' /><br/>",
             "<input type='submit' value='add' />",
             "<button class='cancel'>cancel</button>",
         "</form></li>"].join('')),
