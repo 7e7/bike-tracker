@@ -61,10 +61,10 @@ replace the App.init event handlers with a NavView view
     </div>
 <script>
 var Bike = Backbone.Model.extend({
-	initialize: function(attributes, options) {
-			this.attributes.location = this.attributes.location || "";
-			this.attributes.serial = this.attributes.serial || "";
-		}
+    initialize: function(attributes, options) {
+            this.attributes.location = this.attributes.location || "";
+            this.attributes.serial = this.attributes.serial || "";
+        }
     }),
     Bikes = Backbone.Collection.extend({ model:Bike }),
     StorageLocation = Backbone.Model.extend({
@@ -146,16 +146,16 @@ var Bike = Backbone.Model.extend({
             '<dt>Make</dt><dd><%= bike.get("make") %></dd>',
             '<dt>Model</dt><dd><%= bike.get("model") %></dd>',
             '<dt>Year</dt><dd><%= bike.get("year") %></dd>',
-			'<dt>Serial No.</dt><dd><%= bike.get("serial") %></dd>',
+            '<dt>Serial No.</dt><dd><%= bike.get("serial") %></dd>',
             '<dt>Location</dt><dd><% if(bike.get("location").length){ %><%= bike.get("location") %><% }else{ %>None<% } %></dd>',
         '</dl>'].join('')),
         editTemplate: _.template(['<form>',
-		'<h1><input type="text" name="name" value="<%= bike.get("name") %>" required /></h1>',
-        	'<input type="hidden" name="cid" value="<%= bike.cid %>" /><dl>',
+        '<h1><input type="text" name="name" value="<%= bike.get("name") %>" required /></h1>',
+            '<input type="hidden" name="cid" value="<%= bike.cid %>" /><dl>',
             '<dt>Make</dt><dd><input type="text" name="make" value="<%= bike.get("make") %>" /></dd>',
             '<dt>Model</dt><dd><input type="text" name="model" value="<%= bike.get("model") %>" /></dd>',
             '<dt>Year</dt><dd><input type="text" name="year" value="<%= bike.get("year") %>" /></dd>',
-			'<dt>Serial No.</dt><dd><input type="text" name="serial" value="<%= bike.get("serial") %>" /></dd>',
+            '<dt>Serial No.</dt><dd><input type="text" name="serial" value="<%= bike.get("serial") %>" /></dd>',
             '<dt>Location</dt><dd><input type="text" name="location" value="<%= bike.get("location") %>" /></dd>',
         '</dl><input type="submit" /><button class="cancel" data-id="<%= bike.cid %>">cancel</button></form>'].join('')),
         el:$('.bike'),
@@ -163,7 +163,7 @@ var Bike = Backbone.Model.extend({
             "click .edit":"showEditMode",
             "click .cancel":"rerender",
             "click .delete":"removeBike",
-			'submit form':'updateBike'
+            'submit form':'updateBike'
         },
         showEditMode:function(event){
             $(this.el).empty().append( this.editTemplate({ bike: App.bikes.get( $(event.target).attr('data-id') ) }))
@@ -177,20 +177,20 @@ var Bike = Backbone.Model.extend({
             blv.render();
             $(this.el).empty();
         },
-		updateBike:function(event){
-			event.preventDefault();
-			App.bikes.get(event.target.cid.value).set({
+        updateBike:function(event){
+            event.preventDefault();
+            App.bikes.get(event.target.cid.value).set({
                 name:event.target.name.value,
                 make:event.target.make.value,
                 model:event.target.model.value,
                 year:event.target.year.value,
-				location:event.target.location.value
-			})
-			App.save();
-			this.render(event.target.cid.value);
-			blv.render();
-			
-		}
+                location:event.target.location.value
+            })
+            App.save();
+            this.render(event.target.cid.value);
+            blv.render();
+            
+        }
     })
     StoreView = Backbone.View.extend({
         initialize:function(){
@@ -240,35 +240,35 @@ var Bike = Backbone.Model.extend({
         },
         el:$('.location'),
         template: _.template(['<h1><%= location.get("name") %></h1>',
-			'<p><button class="edit" data-id="<%= location.cid %>">edit</button></p>',
+            '<p><button class="edit" data-id="<%= location.cid %>">edit</button></p>',
             "<ul>",
                 "<% for(var i=0, bikes=location.get('bikes');i<bikes.length;i++){ %> <li><%= bikes[i] %></li> <% } %>",
         "</ul>"].join('')),
-		editTemplate:_.template(['<form>',
-			'<input type="hidden" name="cid" value="<%= location.cid %>" />',
-			'<h1><input type="" name="name" value="<%= location.get("name") %>"/></h1>',
-			'<input type="submit" value="update" /><button class="cancel" data-id="<%= location.cid %>">cancel</button>',
-		'</form>'].join('')),
-		events:{
-			'click .edit': 'showEditMode',
-			'click .cancel': 'rerender',
-			'submit form':'updateLocation'
-		},
-		showEditMode:function(event){
-			$(this.el).empty().append( this.editTemplate({ location: App.store.get( $(event.target).attr('data-id') ) }))
-		},
-		rerender:function(event){
-			this.render($(event.target).attr('data-id'));
-		},
-		updateLocation:function(event){
-			event.preventDefault();
-			App.store.get(event.target.cid.value).set({
+        editTemplate:_.template(['<form>',
+            '<input type="hidden" name="cid" value="<%= location.cid %>" />',
+            '<h1><input type="" name="name" value="<%= location.get("name") %>"/></h1>',
+            '<input type="submit" value="update" /><button class="cancel" data-id="<%= location.cid %>">cancel</button>',
+        '</form>'].join('')),
+        events:{
+            'click .edit': 'showEditMode',
+            'click .cancel': 'rerender',
+            'submit form':'updateLocation'
+        },
+        showEditMode:function(event){
+            $(this.el).empty().append( this.editTemplate({ location: App.store.get( $(event.target).attr('data-id') ) }))
+        },
+        rerender:function(event){
+            this.render($(event.target).attr('data-id'));
+        },
+        updateLocation:function(event){
+            event.preventDefault();
+            App.store.get(event.target.cid.value).set({
                 name:event.target.name.value
-			})
-			App.save();
-			this.render(event.target.cid.value);
-			sv.render();
-		}
+            })
+            App.save();
+            this.render(event.target.cid.value);
+            sv.render();
+        }
     }),
     NavView = Backbone.View.extend({
         initialize:function(){ this.render(); },
