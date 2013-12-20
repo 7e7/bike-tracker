@@ -240,7 +240,7 @@ var Bike = Backbone.Model.extend({
         },
         el:$('.location'),
         template: _.template(['<h1><%= location.get("name") %></h1>',
-            '<p><button class="edit" data-id="<%= location.cid %>">edit</button></p>',
+            '<p><button class="edit" data-id="<%= location.cid %>">edit</button><button class="delete" data-id="<%= location.cid %>">delete</button></p>',
             "<ul>",
                 "<% for(var i=0, bikes=location.get('bikes');i<bikes.length;i++){ %> <li><%= bikes[i] %></li> <% } %>",
         "</ul>"].join('')),
@@ -252,6 +252,7 @@ var Bike = Backbone.Model.extend({
         events:{
             'click .edit': 'showEditMode',
             'click .cancel': 'rerender',
+            'click .delete': 'removeLocation',
             'submit form':'updateLocation'
         },
         showEditMode:function(event){
@@ -267,6 +268,13 @@ var Bike = Backbone.Model.extend({
             })
             App.save();
             this.render(event.target.cid.value);
+            sv.render();
+        },
+        removeLocation:function(event){
+            event.preventDefault();
+            App.store.remove( $(event.target).attr('data-id') )
+            App.save();
+            $(this.el).empty();
             sv.render();
         }
     }),
